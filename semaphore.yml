@@ -1,0 +1,46 @@
+version: v1.0
+name: Go Project CI Pipeline
+
+agent:
+  machine:
+    type: e1-standard-2
+    os_image: ubuntu20
+
+blocks:
+  - name: Install Dependencies
+    task:
+      jobs:
+        - name: Install Go Modules
+          commands:
+            - checkout
+            - cache restore go-mod-cache
+            - go mod download
+            - cache store go-mod-cache ~/.cache/go-build
+
+  - name: Run Tests
+    task:
+      jobs:
+        - name: Run Unit Tests
+          commands:
+            - checkout
+            - cache restore go-mod-cache
+            - go test ./... -v
+            - cache store go-mod-cache ~/.cache/go-build
+
+  - name: Build Application
+    task:
+      jobs:
+        - name: Compile Go Binary
+          commands:
+            - checkout
+            - cache restore go-mod-cache
+            - go build -o my-app
+            - ls -lh my-app
+
+  - name: Deploy
+    task:
+      jobs:
+        - name: Deploy Application
+          commands:
+            - echo "Deploying application..."
+            # Add deployment scripts here
